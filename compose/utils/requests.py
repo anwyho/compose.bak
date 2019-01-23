@@ -12,21 +12,13 @@ from typing import (Tuple)
 from .errors import (handle_request_error)
 
 
-# IDEA: Pass in a function also? Then it will be a pure wrapper
-#   around the requests package
-
-# TODO: Link this to a global variable
-TESTING_LOCALLY = True
-
-
 def post(*args, **kwargs) -> Tuple[bool, dict]:
     """
     Sends POST request to given URL with error handling.
     Returns OK and response as a dict.
     """
 
-    if TESTING_LOCALLY:
-        return (True, {'recipient': '<SENDER_ID>', 'mid': '<MSG_ID>'})
+    _test_response = (True, {'recipient': '<SENDER_ID>', 'mid': '<MSG_ID>'})  # noqa
 
     logging.info("Performing POST request")
 
