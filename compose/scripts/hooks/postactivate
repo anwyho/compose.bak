@@ -1,0 +1,65 @@
+#!/bin/bash
+# This hook is sourced after this virtualenv is activated.
+
+# Names of keys/parameters to retreive from AWS Parameter Store
+KEYS=(
+    DARK_SKY_PRIV
+    DEBUG_TOK
+    BART_PRIV
+    BART_PUBL
+    FB_PAGE_ACCESS
+    FB_PAGE_ACCESS_2
+    FB_VERIFY_TOK
+    WIT_SERVER_TOK
+    .)
+
+# Extract key values from JSON object with python3
+parse_params="
+import sys, json
+param = json.load(sys.stdin)
+print(param['Parameters'][0]['Value'])
+"
+
+import_vars () {
+
+    # For local debugging
+    export SLS_DEBUG=*
+    export FLASK_APP=compose
+    export FLASK_ENV=development
+
+    echo "Importing environment variables from AWS..." >&1
+
+    for KEY in ${KEYS[@]}:
+    do
+        if [[ $KEY != ".:" ]]
+        then
+            VAL=$(\
+            aws ssm get-parameters --names $KEY | \
+            python3 -c "$parse_params")
+            # Sets local variable KEYNAME="VALNAME"
+            printf -v $KEY "$VAL"
+            export $KEY  # Puts KEYNAME into environment
+        fi
+    done
+
+    # Prints environment variables joined by commas
+    function join_by { local d=$1; shift; echo -n "$1"; shift; printf "%s" "${@/#/$d}"; }
+    echo "Done importing environment variables: $(join_by ", " "${KEYS[@]::${#KEYS[@]}-1}")." >&1
+
+    remove_vars () {
+        for KEY in ${KEYS[@]}:
+        do
+            if [[ $KEY != ".:" ]]
+            then
+                unset $KEY  # Removes KEYNAME from environment
+            fi
+        done
+        unset $SLS_DEBUG
+        unset -f import_vars
+        unset -f remove_vars
+        # Prints environment variables removed
+        echo "Removed variables: $(join_by ", " "${KEYS[@]::${#KEYS[@]}-1}")." >&1
+    }  # remove_vars()
+}  # import_vars()
+
+import_vars

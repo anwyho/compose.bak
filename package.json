@@ -1,0 +1,26 @@
+{
+  "name": "compose",
+  "version": "1.0.0",
+  "description": "A chatbot framework for creating stateful, serverless Messenger chatbots",
+  "main": "index.js",
+  "scripts": {
+    "test": "python -m unittest",
+    "install:mac": "./setup_instructions/mac_installation.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anwyho/compose.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/anwyho/compose/issues"
+  },
+  "homepage": "https://github.com/anwyho/compose#readme",
+  "devDependencies": {
+    "serverless-plugin-parent": "0.0.3",
+    "serverless-python-requirements": "^4.2.5",
+    "serverless-wsgi": "^1.6.0"
+  }
+}
