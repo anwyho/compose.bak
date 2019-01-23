@@ -3,7 +3,7 @@ import requests
 from functools import (partial)
 from typing import (List)
 
-from .test_configs import (TEST_URL)
+from compose.test.test_configs import (TEST_URL)
 
 app_endpoint: partial = partial(requests.request, url=TEST_URL)
 

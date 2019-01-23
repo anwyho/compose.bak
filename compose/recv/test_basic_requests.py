@@ -4,7 +4,7 @@ import unittest
 from requests import (Response)
 from typing import (Dict)
 
-from .test_utils import app_endpoint
+from compose.test.test_utils import app_endpoint
 # from compose.test.configs import (TEST_URL)
 
 

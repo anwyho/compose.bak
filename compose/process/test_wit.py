@@ -1,10 +1,9 @@
-
 import unittest
 from requests import (Response)
-from .test_utils import (app_endpoint, RequestBuilder)
+from compose.test.test_utils import (app_endpoint, RequestBuilder)
 
 
-class TestPosts(unittest.TestCase):
+class TestWit(unittest.TestCase):
 
     def setUp(self) -> None:
         pass
