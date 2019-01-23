@@ -5,15 +5,11 @@ import sys
 
 from typing import (List, Optional)
 
+import compose.process as proc
 import compose.recv as recv
-from compose.process import (Controller)
-from compose.recv import (Message)
-from compose.send import (Response)
+import compose.send as send
+
 from compose.utils.errors import (generate_error_message)
-
-
-from compose.process.controller import EchoController
-CONTROLLER = EchoController
 
 
 def process_event_messenger(request: flask.Request) -> List[dict]:
@@ -53,11 +49,12 @@ def page_event(entry: dict) -> List[dict]:
     # Number of messages in batch before activating multithreading
     SEQ_PROCESS_MSG_THRESH = 1
 
+    CONTROLLER = proc.import_controller()
+
     if len(entry.get('messaging', '')) <= SEQ_PROCESS_MSG_THRESH:
         results = [handle_message(message, CONTROLLER)
                    for message in get_messages(entry)]
     else:  # Sequential handling of message
-        futures: list = []
         results: list = []
         from concurrent.futures import (Future, ThreadPoolExecutor)
         with ThreadPoolExecutor(max_workers=8) as p:
@@ -65,9 +62,10 @@ def page_event(entry: dict) -> List[dict]:
             #   kills the concurrency since the list comprehension
             #   evaluates the statements here.
             # TODO: Check if removing `*( )` breaks code
-            futures: List[Future] = [
-                p.submit(handle_message, *(message, CONTROLLER))
-                for message in get_messages(entry)]
+            futures: List[Future] = []
+            for message in get_messages(entry):
+                futures.append(
+                    p.submit(handle_message, *(message, CONTROLLER)))
 
         # Wait for all futures to finish
         for future in futures:
@@ -83,17 +81,18 @@ def page_event(entry: dict) -> List[dict]:
     return list(results)
 
 
-def handle_message(message: recv.Message, controllerType: Controller) -> dict:
+def handle_message(message: recv.Message, controllerType: proc.Controller) \
+        -> dict:
     """Create and send Responses and return the output."""
     try:
-        return Response.from_message(
+        return send.Response.from_message(
             message=message,
-            controllerType=controllerType).send()
+            withControllerType=controllerType).send()
     except Exception as e:
         generate_error_message(sys.exec_info(), e)
 
 
-def get_messages(entry: dict) -> Message:
+def get_messages(entry: dict) -> recv.Message:
     """
     Get specifically-typed instantiated messages from an entry
         depending on distinguishing factors in each message.

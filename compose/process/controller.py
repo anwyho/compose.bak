@@ -5,20 +5,14 @@ from abc import (ABC, abstractmethod)
 from concurrent.futures import (ThreadPoolExecutor)
 from typing import (Optional)
 
-from compose.recv.message import (Message)
-from compose.send.response import (InvalidResponseStructureError, Response)
-from compose.send.response_builder import (
-    ResponseBuilderError, ResponseBuilder)
+from compose.send import (InvalidResponseStructureError,
+                          Response, ResponseBuilderError, ResponseBuilder)
 from compose.utils.errors import (generate_error_message)
 
 
-def import_controller(controllerName: str):
-    pass
-
-
 class Controller(ABC):
-    def __init__(self, message: Message, dryRun: bool = False) -> None:
-        self.message: Message = message
+    def __init__(self, message, dryRun: bool = False) -> None:
+        self.message = message
         self._dryRun: bool = dryRun
         self._executor: Optional[ThreadPoolExecutor] = None
 
@@ -27,16 +21,24 @@ class Controller(ABC):
         Lay out overall logic of Controller and expose all processing
             functions to a thread executor
         """
-        with ThreadPoolExecutor(max_workers=8) as executor:
-            self._executor = executor
-            self.preprocess_message()
-            try:
+
+        try:
+            with ThreadPoolExecutor(max_workers=8) as executor:
+                self._executor = executor
+                self.preprocess_message()
                 response = self.process_message()
-            except (InvalidResponseStructureError, ResponseBuilderError) as e:
-                generate_error_message(sys.exec_info(), e)
-            except Exception as e:
-                generate_error_message(sys.exec_info(), e)
-            self.postprocess_message()
+                self.postprocess_message()
+        except (InvalidResponseStructureError, ResponseBuilderError) as e:
+            generate_error_message(sys.exec_info(), e)
+        except Exception as e:
+            generate_error_message(sys.exec_info(), e)
+
+        finally:
+            # TODO: What happens if a Response is not generated?
+            if not isinstance(response, ResponseBuilder):
+                pass
+            self._executor = None
+
         return response
 
     @abstractmethod
