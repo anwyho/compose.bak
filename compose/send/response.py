@@ -88,6 +88,7 @@ class Response:
             sleep(self._timeout)
 
         results: List[Tuple[bool, Optional[dict]]] = []
+
         if self._dryRun:
             res = f"DRY-RUN - {self.description}"
             print(res)

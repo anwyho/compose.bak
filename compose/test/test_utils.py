@@ -1,11 +1,13 @@
 import requests
 
-from functools import (partial)
 from typing import (List)
 
 from compose.test.test_configs import (TEST_URL)
 
-app_endpoint: partial = partial(requests.request, url=TEST_URL)
+
+def app_endpoint(*args, **kwargs):
+    return requests.request(method=args[0] if args else kwargs['method'],
+                            url=TEST_URL, **kwargs)
 
 
 class RequestBuilder:

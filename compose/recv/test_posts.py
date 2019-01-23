@@ -17,7 +17,7 @@ class TestPosts(unittest.TestCase):
         Sends empty and erroneous POST requests expecting 200 status.
         """
 
-        response: Response = app_endpoint('POST', data={})
+        response: Response = app_endpoint('POST', json={})
         self.assertEqual(response.status_code, 200,
                          'Empty post should still return 200 OK status.')
 
@@ -27,7 +27,7 @@ class TestPosts(unittest.TestCase):
         """
 
         data: dict = RequestBuilder().add_text("Hello there.").build()
-        response: Response = app_endpoint('POST', data=data)
+        response: Response = app_endpoint('POST', json=data)
         # print(response.content)
         # self.assertTrue(ok, 'Must receive OK from response.')
         self.assertEqual(response.status_code, 200,

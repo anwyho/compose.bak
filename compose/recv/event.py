@@ -16,9 +16,11 @@ def process_event_messenger(request: flask.Request) -> List[dict]:
     """Collects and processes events. Returns a list of JSONs of responses"""
 
     data: Optional[dict] = request.get_json(silent=True)
-    entryList: List[dict] = data.get('entry', []) if data else []
+    entryList: List[dict] = data.get('entry', []) if data else[]
 
-    # There will only be one entry. source: # TODO
+    if len(entryList) == 0:
+        raise KeyError("Empty request.")
+    # Guaranteed, there will only be one entry. source: # TODO
     if not (len(entryList) == 1 and isinstance(entryList[0], dict)):
         raise KeyError("Received entry had an unexpected structure.")
 
@@ -84,6 +86,7 @@ def page_event(entry: dict) -> List[dict]:
 def handle_message(message: recv.Message, controllerType: proc.Controller) \
         -> dict:
     """Create and send Responses and return the output."""
+
     try:
         return send.Response.from_message(
             message=message,
