@@ -1,0 +1,139 @@
+
+
+service: echobot-app  # Replace this with your own name
+
+
+package:
+  exclude:
+    # Folders
+    - compose/__pycache__
+    - compose/**/__pycache__
+    - compose/.logs
+    - compose/scripts/*.sh
+    - misc/**
+    # - node_modules/**
+    # - resources/images/**
+    - tests
+    - tmp/**
+    # Files
+    # - "*.log"
+    - .git/**
+    - .gitignore
+    - compose.code-workspace
+    - contributing.md
+    - functionsToImplement.md
+  excludeDevDependencies: true
+
+
+
+plugins:
+  - serverless-python-requirements
+  - serverless-wsgi
+  # TODO: For production
+    # - https://github.com/FidelLimited/serverless-plugin-warmup
+  # - serverless-plugin-warmup
+
+custom:
+  wsgi:
+    app: compose.webhook.compose_app
+    packRequirements: false
+  pythonRequirements:
+    dockerizePip: non-linux
+
+provider:
+  name: aws
+  runtime: python3.6
+  stage: dev
+  region: us-west-1
+  # iamRoleStatements:
+  #   - Effect: Allow  # For serverless-plugin-warmup
+  #     Action:
+  #       - 'lambda:InvokeFunction'
+  #     Resource: "*"
+  #   - Effect: Allow
+  #     Action:
+  #       - dynamodb:Query
+  #       - dynamodb:Scan
+  #       - dynamodb:GetItem
+  #       - dynamodb:PutItem
+  #       - dynamodb:UpdateItem
+  #       - dynamodb:DeleteItem
+  #     Resource:
+  #       - { "Fn::GetAtt": ["UserSessionsDynamoDBTable", "Arn" ] }
+  #       - { "Fn::GetAtt": ["UserMetadataDynamoDBTable", "Arn" ] }
+  #       - { "Fn::GetAtt": ["BartbotCacheDynamoDBTable", "Arn" ] }
+  # environment:
+  #   USER_SESSIONS: ${self:custom.userSessions}
+  #   USER_METADATA: ${self:custom.userMetadata}
+  #   BARTBOT_CACHE: ${self:custom.bartbotCache}
+
+functions:
+  app:
+    handler: wsgi.handler
+    description: A simple chatbot that echoes what it receives.  # Proxy for chatbot controller through Compose framework
+    timeout: 8
+    memorySize: 1024
+    # warmup: true  # For serverless-plugin-warmup
+    events:
+      - http: ANY /
+      - http: 'ANY {proxy+}'
+    # package:
+    #   include:
+    #     - compose/**
+    #   exclude:
+    #     - .git/**
+    #     - pybart/**
+    environment:
+      DARK_SKY_PRIV: ${ssm:DARK_SKY_PRIV}
+      DEBUG_TOK: ${ssm:DEBUG_TOK}
+      BART_PRIV: ${ssm:BART_PRIV}
+      BART_PUBL: ${ssm:BART_PUBL}
+      FB_PAGE_ACCESS: ${ssm:FB_PAGE_ACCESS}
+      FB_PAGE_ACCESS_2: ${ssm:FB_PAGE_ACCESS_2}
+      FB_VERIFY_TOK: ${ssm:FB_VERIFY_TOK}
+      WIT_SERVER_TOK: ${ssm:WIT_SERVER_TOK}
+
+# resources:
+#   Resources:
+#     UserSessionsDynamoDBTable:
+#       Type: 'AWS::DynamoDB::Table'
+#       Properties:
+#         AttributeDefinitions:
+#           - AttributeName: userId
+#             AttributeType: S
+#         KeySchema:
+#           - AttributeName: userId
+#             KeyType: HASH
+#         ProvisionedThroughput:
+#           ReadCapacityUnits: 1
+#           WriteCapacityUnits: 1
+#         TableName: ${self:custom.userSessions}
+#     UserMetadataDynamoDBTable:
+#       Type: 'AWS::DynamoDB::Table'
+#       Properties:
+#         AttributeDefinitions:
+#           - AttributeName: userId
+#             AttributeType: S
+#         KeySchema:
+#           - AttributeName: userId
+#             KeyType: HASH
+#         ProvisionedThroughput:
+#           ReadCapacityUnits: 1
+#           WriteCapacityUnits: 1
+#         TableName: ${self:custom.userMetadata}
+#     BartbotCacheDynamoDBTable:
+#       Type: 'AWS::DynamoDB::Table'
+#       Properties:
+#         AttributeDefinitions:
+#           - AttributeName: station
+#             AttributeType: S
+#         KeySchema:
+#           - AttributeName: station
+#             KeyType: HASH
+#         ProvisionedThroughput:
+#           ReadCapacityUnits: 1
+#           WriteCapacityUnits: 1
+#         TableName: ${self:custom.bartbotCache}
+
+
+# Designed Python API/framework for interfacing with Messenger chatbot APIs. Created chatbot with AWS Lambda and DynamoDB to return live schedules from BART API. Familiar with software development lifecycle and version control (through GitHub). Wrote tests to be run before every push to support continuous delivery.
