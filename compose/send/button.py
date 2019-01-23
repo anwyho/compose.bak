@@ -5,7 +5,7 @@ import logging  # noqa
 from abc import (ABC, abstractmethod)
 from typing import (List, Optional)
 
-from .response_utils import (set_if_exists)
+from .response_utils import (CondSetter as sets)
 # from .response_attachment import (ShareTemplate)
 
 
@@ -72,13 +72,14 @@ class UrlButton(Button):
         self._button: dict = {}
 
         self.buttonType: str = 'web_url'
-        set_if_exists(self, '_title', text, maxLen=self.TITLE_CHAR_LIMIT)
-        set_if_exists(self, '_url', url)
-        set_if_exists(self, '_webviewHeightRatio', webviewHeightRatio,
-                      types=self.WEB_VIEW_HEIGHT_RATIOS)
+        sets.with_max_string_len(self, '_title', text,
+                                 maxLen=self.TITLE_CHAR_LIMIT)
+        sets.if_exists(self, '_url', url)
+        sets.if_in_list(self, '_webviewHeightRatio', webviewHeightRatio,
+                      typeList=self.WEB_VIEW_HEIGHT_RATIOS)
         if messengerExtensions:
             self._messengerExtensions: bool = True
-            set_if_exists(self, '_fallbackUrl', fallbackUrl)
+            sets.if_exists(self, '_fallbackUrl', fallbackUrl)
 
         if not webviewShareButton:
             self._webviewShareButton: str = 'hide'
@@ -109,8 +110,8 @@ class PostbackButton(Button):
 
     def __init__(self, text: str, postbackData: str) -> None:
         self.buttonType: str = 'postback'
-        set_if_exists(self,
-                      '_title', text, maxLen=self.BUTTON_TITLE_CHAR_LIMIT)
+        sets.with_max_string_len(self, '_title', text,
+                                 maxLen=self.BUTTON_TITLE_CHAR_LIMIT)
         self._payload: str = postbackData
 
     def build(self) -> dict:
@@ -158,8 +159,9 @@ class CallButton(Button):
             country code.
         """
         self.buttonType: str = 'phone_number'
-        set_if_exists(self, '_title', text, self.BUTTON_TITLE_CHAR_LIMIT)
-        set_if_exists(self, '_payload', phoneNumber, prefix='+')
+        sets.with_max_string_len(self, '_title', text,
+                                 maxLen=self.BUTTON_TITLE_CHAR_LIMIT)
+        sets.if_starts_with(self, '_payload', phoneNumber, prefix='+')
 
     def build(self) -> dict:
         if not hasattr(self, '_button'):

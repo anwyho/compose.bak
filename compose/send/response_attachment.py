@@ -5,7 +5,7 @@ import logging
 from abc import (ABC, abstractmethod)
 from typing import (List, Optional, Union)
 
-from .response_utils import (set_if_exists)
+from .response_utils import (CondSetter as sets)
 from .button import (Button, UrlButton)
 
 
@@ -108,28 +108,26 @@ class GenericTemplate(Template):
                      webviewShareButton: Optional[str] = None,
                      messengerExtensions: bool = False,
                      fallbackUrl: Optional[str] = None) -> None:
+            sets.with_max_string_len(self, '_title', title,
+                                     maxLen=self.TITLE_CHAR_LIMIT,
+                                     raiseOnFail=True)
+            sets.with_max_string_len(self, '_subtitle', subtitle,
+                                     maxLen=self.SUBTITLE_CHAR_LIMIT)
+            sets.if_exists(self, '_imageUrl', imageUrl)
 
-            set_if_exists(self, '_title', title,
-                          maxLen=self.TITLE_CHAR_LIMIT,
-                          raiseOnFail=True)
-            if subtitle:
-                set_if_exists(self, '_subtitle', subtitle,
-                              maxLen=self.SUBTITLE_CHAR_LIMIT)
-            if imageUrl:
-                self._imageUrl = imageUrl
             # Accepts same arguments as UrlButton except Title
             if defaultActionUrl:
                 self._type = 'web_url'
                 self._defaultActionUrl = defaultActionUrl
-                set_if_exists(self, '_webviewHeightRatio', webviewHeightRatio)
-                set_if_exists(self, '_webviewShareButton', webviewShareButton)
+                sets.if_exists(self, '_webviewHeightRatio', webviewHeightRatio)
+                sets.if_exists(self, '_webviewShareButton', webviewShareButton)
                 if messengerExtensions:
                     self._messengerExtensions = True
-                    set_if_exists(self, '_fallbackUrl', fallbackUrl)
+                    sets.if_exists(self, '_fallbackUrl', fallbackUrl)
 
             if isinstance(buttons, list):
-                set_if_exists(self, '_buttons', buttons,
-                              maxLen=self.MAX_BUTTONS)
+                sets.with_max_string_len(self, '_buttons', buttons,
+                                         maxLen=self.MAX_BUTTONS)
 
         def build(self) -> dict:
             if not hasattr(self, '_element'):
@@ -169,8 +167,8 @@ class GenericTemplate(Template):
                  shareable: bool = False):
         self.templateType: str = 'generic'
         imageAspectRatio = imageAspectRatio.lower()
-        set_if_exists(self, '_imageAspectRatio', imageAspectRatio,
-                      types=self.IMAGE_ASPECT_RATIOS)
+        sets.if_in_list(self, '_imageAspectRatio', imageAspectRatio,
+                        typeList=self.IMAGE_ASPECT_RATIOS)
         self._shareable = shareable
         self._elements: list = []  # TODO: Initialize elements
 
@@ -207,7 +205,8 @@ class ButtonTemplate(Template):
                  buttons: List[Button],
                  shareable: bool = False):
         self.templateType: str = 'button'
-        set_if_exists(self, '_text', text, maxLen=self.TEXT_CHAR_LIMIT)
+        sets.with_max_string_len(self, '_text', text,
+                                 maxLen=self.TEXT_CHAR_LIMIT)
         self._shareable = shareable
 
         # Check that buttons is a list
@@ -222,8 +221,8 @@ class ButtonTemplate(Template):
                 buttons[:self.MAX_BUTTONS]):
             ValueError("Every element passed in the buttons argument of ButtonTemplate must be a Button.")  # noqa: E501
         else:
-            set_if_exists(self, '_buttons', buttons,
-                          maxLen=self.MAX_BUTTONS, raiseOnFail=True)
+            sets.with_max_string_len(self, '_buttons', buttons,
+                                     maxLen=self.MAX_BUTTONS, raiseOnFail=True)
 
     def build(self) -> dict:
         if not hasattr(self, '_template'):
@@ -254,9 +253,9 @@ class ListTemplate(Template):
                  templateButton: Optional[Button] = None,
                  shareable: bool = False):
         self.templateType: str = 'list'
-        set_if_exists(self, '_topElementStyle',
-                      topElementStyle, types=self.TOP_ELEMENT_STYLES)
-        set_if_exists(self, '_templateButton', templateButton)
+        sets.if_in_list(self, '_topElementStyle',
+                      topElementStyle, typeList=self.TOP_ELEMENT_STYLES)
+        sets.if_exists(self, '_templateButton', templateButton)
         self._shareable = shareable
         self._elements: List[self.ListElement] = []
 
@@ -297,9 +296,10 @@ class MediaTemplate(Template):
                  shareable: bool = False):
         # TODO: Include a NOTE about url receiving priority
         self.templateType: str = 'media'
-        set_if_exists(self, '_mediaType', mediaType, types=self.MEDIA_TYPES)
+        sets.if_in_list(self, '_mediaType', mediaType,
+                        typeList=self.MEDIA_TYPES)
 
-        set_if_exists(self, '_url', url)
+        sets.if_exists(self, '_url', url)
         if not hasattr(self, '_url'):
             if attachmentId and attachmentId.isdigit():
                 self._attachmentId = attachmentId
@@ -307,7 +307,7 @@ class MediaTemplate(Template):
                 ValueError(f"Invalid attachment ID '{attachmentId}' provided for media template.")  # noqa: E501
             if not hasattr(self, '_attachmentId'):
                 ValueError("Attempted to make a media template without any media source. Please include a valid attachment ID or URL.")  # noqa: E501
-        set_if_exists(self, '_button', button)
+        sets.if_exists(self, '_button', button)
         self._shareable = shareable
 
     def build(self) -> dict:
@@ -352,4 +352,3 @@ class ShareTemplate(GenericTemplate):
 
     def build(self) -> dict:
         return super().build()
-

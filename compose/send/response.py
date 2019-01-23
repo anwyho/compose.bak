@@ -4,7 +4,6 @@ import logging
 from time import (sleep)
 from typing import (List, Optional, Tuple)
 
-from compose.recv.message import (Message)
 from compose.utils.requests import (post)
 from compose.utils.urls import (MESSAGES_API)
 
@@ -52,8 +51,8 @@ class Response:
         self._passingChecks: bool = False
 
     @classmethod
-    def from_message(cls, message: Message, controllerType):
-        return controllerType(message).produce_responses()
+    def from_message(cls, message, withControllerType):
+        return withControllerType(message).produce_responses()
 
     def _pre_send_check(self):
         """
