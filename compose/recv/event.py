@@ -100,7 +100,7 @@ def handle_message(message: recv.Message, controllerType: proc.Controller) \
         result = response.send()
         return result
     except Exception as e:
-        gen_err_msg(sys.exec_info(), e)
+        gen_err_msg(sys.exc_info(), e)
 
 
 def get_messages(entry: dict) -> recv.Message:
@@ -140,7 +140,7 @@ def get_messages(entry: dict) -> recv.Message:
             try:
                 messageInstance = messageType(entry=entry, mNum=msgNum)
             except recv.MessageParsingError as e:
-                gen_err_msg(sys.exec_info(), e)
+                gen_err_msg(sys.exc_info(), e)
                 logging.warning(f"Failed to parse message. Error: {e}")
                 logging.debug(json.dumps(entry))
                 messageInstance = None

@@ -2,18 +2,20 @@
 
 import flask
 import json  # noqa
-import logging  # TODO: Look into logging that filters sensitive info
-import os
+import logging  # TODO: Look into logging that filters sensitive info  # noqa
+import os  # noqa
 import sys
-import traceback
+import traceback  # noqa
 
 from typing import (List, Tuple)
 
 from compose.recv.event import (process_event_messenger)
+from compose.utils.errors import (gen_err_msg)
 from compose.utils.keys import (verify_challenge, verify_signature)
 
 
 compose_app = flask.Flask(__name__)
+PROPAGATE_ERRORS = True
 
 
 @compose_app.route("/", methods=['GET'])
@@ -48,6 +50,8 @@ def handle_webhook() -> str:
             response = ("Unsupported HTTPS Verb.", 405)
 
     except Exception as e:
+        # if PROPAGATE_ERRORS:
+        #     raise
         print("\nReceived error\n")
         response = (f"{gen_err_msg(sys.exc_info(), e)}\nERROR: Not OK, but surviving. Check logs\n", 200)  # noqa: E501
 
@@ -67,25 +71,11 @@ def process_post(request: flask.Request):
         for mNum, messageResult in enumerate(event, start=1):
             wasSent, response = messageResult
             if wasSent:
-                respMsg += f"Sent msg {mNum} of {len(event)} in event {eNum}.\n"
+                respMsg += f"Sent msg {mNum} of {len(event)} in event {eNum}.\n"   # noqa
             else:
                 sentAll = False
                 respMsg += f'FAILED to send msg {mNum} of {len(event)} in event {eNum} with error: {response.get("error", "Could not get error.")}\n'  # noqa: E501
     return f"{{'success': '{respMsg}'}}" if sentAll else f"{{'error': '{respMsg}'}}"  # noqa: E501
-
-
-def gen_err_msg(execInfo, err: Exception) -> str:
-    # TODO: typing for execInfo ^
-    """
-    Accepts sys.exec_info and error e and converts to a readable string.
-    """
-
-    exc_type, _, exc_tb = execInfo
-    traceback.print_tb(exc_tb)
-    filename = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-    errorMsg: str = f"An unexpected error occurred. Error: {err}. Error info: {exc_type}, {filename}, {exc_tb.tb_lineno}"  # noqa: E501
-    logging.debug(errorMsg)
-    return errorMsg
 
 
 if __name__ == '__main__':

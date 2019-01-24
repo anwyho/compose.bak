@@ -20,7 +20,7 @@ def handle_request_error(response: dict) -> bool:
 def gen_err_msg(execInfo, err: Exception) -> str:
     # TODO: typing for execInfo ^
     """
-    Accepts sys.exec_info and error e and converts to a readable string.
+    Accepts sys.exc_info and error e and converts to a readable string.
     """
 
     exc_type, _, exc_tb = execInfo
@@ -36,4 +36,4 @@ def catch_here(wrapped, instance, args, kwargs):
     try:
         return wrapped(*args, **kwargs)
     except Exception as e:
-        gen_err_msg(sys.exec_info(), e)
+        gen_err_msg(sys.exc_info(), e)

@@ -27,15 +27,13 @@ class Controller(ABC):
                 self._executor = executor
 
                 self.preprocess_message()
-
                 response = self.process_message()
-
                 self.postprocess_message()
 
         except (InvalidResponseStructureError, ResponseBuilderError) as e:
-            gen_err_msg(sys.exec_info(), e)
+            gen_err_msg(sys.exc_info(), e)
         except Exception as e:
-            gen_err_msg(sys.exec_info(), e)
+            gen_err_msg(sys.exc_info(), e)
 
         finally:
             # TODO: What happens if a Response is not generated?

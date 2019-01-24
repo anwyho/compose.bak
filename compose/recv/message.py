@@ -30,7 +30,7 @@ def safe_parse(wrapped, instance, args, kwargs):
     except (AttributeError, IndexError, KeyError, TypeError) as e:
         raise MessageParsingError(f"Couldn't parse JSON entry. Error: {e}")
     except Exception as e:
-        gen_err_msg(sys.exec_info(), e)
+        gen_err_msg(sys.exc_info(), e)
 
 
 class Message(ABC):  # Message is an Abstract Base Class
