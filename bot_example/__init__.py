@@ -1,5 +1,5 @@
 from typing import (List)
 
-from .process import (CONTROLLER)
+from .process.controller import (CONTROLLER)
 
 __all__: List[str] = ['CONTROLLER']
