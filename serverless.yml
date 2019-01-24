@@ -90,6 +90,7 @@ functions:
       BART_PUBL: ${ssm:BART_PUBL}
       FB_PAGE_ACCESS: ${ssm:FB_PAGE_ACCESS}
       FB_PAGE_ACCESS_2: ${ssm:FB_PAGE_ACCESS_2}
+      FB_PID: ${ssm:FB_PID}
       FB_VERIFY_TOK: ${ssm:FB_VERIFY_TOK}
       WIT_SERVER_TOK: ${ssm:WIT_SERVER_TOK}
 
