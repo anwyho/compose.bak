@@ -1,0 +1,37 @@
+
+service: echobot-app
+
+plugins:
+  - serverless-plugin-parent
+  - serverless-python-requirements
+  - serverless-wsgi
+
+
+custom:
+  parent:
+    path: ../serverless.yml
+
+provider:
+  environment:
+    TEST: test
+
+functions:
+  app:
+    handler: wsgi.handler
+    description: A simple chatbot that echoes what it receives.
+    timeout: 22
+    memorySize: 512
+    events:
+      - http: ANY /
+      - http: 'ANY {proxy+}'
+    environment:
+      # DARK_SKY_PRIV: ${ssm:DARK_SKY_PRIV}
+      # DEBUG_TOK: ${ssm:DEBUG_TOK}
+      # BART_PRIV: ${ssm:BART_PRIV}
+      # BART_PUBL: ${ssm:BART_PUBL}
+      # FB_PAGE_ACCESS: ${ssm:FB_PAGE_ACCESS}
+      FB_PAGE_ACCESS_2: ${ssm:FB_PAGE_ACCESS_2}
+      FB_PAGE_ACCESS: ${ssm:FB_PAGE_ACCESS}
+      FB_VERIFY_TOK: ${ssm:FB_VERIFY_TOK}
+      # FB_VERIFY_TOK: ${ssm:FB_VERIFY_TOK}
+      # WIT_SERVER_TOK: ${ssm:WIT_SERVER_TOK}
