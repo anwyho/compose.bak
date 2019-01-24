@@ -7,7 +7,7 @@ import wrapt
 from abc import (ABC, ABCMeta)
 from typing import (Tuple, TypeVar)
 
-from compose.utils.errors import (generate_error_message)
+from compose.utils.errors import (gen_err_msg)
 
 Coordinate = Tuple[float, float]
 ParamType = TypeVar('ParamType', str, int, Coordinate, list)
@@ -30,7 +30,7 @@ def safe_parse(wrapped, instance, args, kwargs):
     except (AttributeError, IndexError, KeyError, TypeError) as e:
         raise MessageParsingError(f"Couldn't parse JSON entry. Error: {e}")
     except Exception as e:
-        generate_error_message(sys.exec_info(), e)
+        gen_err_msg(sys.exec_info(), e)
 
 
 class Message(ABC):  # Message is an Abstract Base Class

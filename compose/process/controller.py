@@ -7,7 +7,7 @@ from typing import (Optional)
 
 from compose.send import (InvalidResponseStructureError,
                           Response, ResponseBuilderError, ResponseBuilder)
-from compose.utils.errors import (generate_error_message)
+from compose.utils.errors import (gen_err_msg)
 
 
 class Controller(ABC):
@@ -25,18 +25,23 @@ class Controller(ABC):
         try:
             with ThreadPoolExecutor(max_workers=8) as executor:
                 self._executor = executor
+
                 self.preprocess_message()
+
                 response = self.process_message()
+
                 self.postprocess_message()
+
         except (InvalidResponseStructureError, ResponseBuilderError) as e:
-            generate_error_message(sys.exec_info(), e)
+            gen_err_msg(sys.exec_info(), e)
         except Exception as e:
-            generate_error_message(sys.exec_info(), e)
+            gen_err_msg(sys.exec_info(), e)
 
         finally:
             # TODO: What happens if a Response is not generated?
             if not isinstance(response, ResponseBuilder):
-                pass
+                response = Response(apiUrl='', dryRun=True,
+                                    description='No valid response was generated.')  # noqa: E501
             self._executor = None
 
         return response

@@ -14,11 +14,10 @@ def handle_request_error(response: dict) -> bool:
     """
 
     logging.debug(f"Response: {json.dumps(response,indent=2)}")
-
     return 'error' not in response
 
 
-def generate_error_message(execInfo, err: Exception) -> str:
+def gen_err_msg(execInfo, err: Exception) -> str:
     # TODO: typing for execInfo ^
     """
     Accepts sys.exec_info and error e and converts to a readable string.
@@ -37,4 +36,4 @@ def catch_here(wrapped, instance, args, kwargs):
     try:
         return wrapped(*args, **kwargs)
     except Exception as e:
-        generate_error_message(sys.exec_info(), e)
+        gen_err_msg(sys.exec_info(), e)
