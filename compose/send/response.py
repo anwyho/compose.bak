@@ -51,8 +51,8 @@ class Response:
         self._passingChecks: bool = False
 
     @classmethod
-    def from_message(cls, message, withControllerType):
-        return withControllerType(message).produce_responses()
+    def from_message(cls, message, withController):
+        return withController(message=message).produce_responses()
 
     def _pre_send_check(self):
         """
@@ -77,7 +77,7 @@ class Response:
         self._pre_send_check()
         return self._passingChecks
 
-    def send(self, inChain: bool = False) -> List[bool]:
+    def send(self, inChain: bool = False) -> List[Tuple[bool, dict]]:
         """
         Check if response passes checks and then send current
             response and any chained responses. Return a list of
@@ -97,10 +97,10 @@ class Response:
 
         elif self.passedChecks:
             results.append(post(self.apiUrl, json=self._data))
-            if results[-1][0]:  # Successfully sent
+            if results[0][0]:  # Successfully sent
                 print(f"sent - {self.description}")
             else:  # Failed to send
-                print(f"FAILED - {self.description}\n\t{results[-1][1]}")
+                print(f"FAILED - {self.description}\n\t{results[0][1]}")
             results.extend(self.send_chained_response())
 
         else:
@@ -116,6 +116,6 @@ class Response:
     def timeout(self, timeout: float) -> None:
         self._timeout = timeout if timeout < self.MAX_TIMEOUT else 0
 
-    def send_chained_response(self):
+    def send_chained_response(self) -> List[Tuple[bool, dict]]:
         return self._chainedResponse.send(inChain=True) \
-            if isinstance(self._chainedResponse, Response) else[]
+            if isinstance(self._chainedResponse, Response) else []

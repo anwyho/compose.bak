@@ -3,13 +3,17 @@ import json
 import logging
 import sys
 
-from typing import (List, Optional)
+from concurrent.futures import (Future, ThreadPoolExecutor)
+from typing import (List, Optional, Tuple)
 
 import compose.process as proc
 import compose.recv as recv
 import compose.send as send
 
-from compose.utils.errors import (generate_error_message)
+from compose.utils.errors import (gen_err_msg)
+
+# Number of messages in batch before activating multithreading
+SEQ_PROCESS_MSG_THRESH = 1
 
 
 def process_event_messenger(request: flask.Request) -> List[dict]:
@@ -38,27 +42,29 @@ def process_event_messenger(request: flask.Request) -> List[dict]:
     return results
 
 
-def user_event(entry: dict) -> List[dict]:
+def user_event(entry: dict) -> List[Tuple[bool, dict]]:
     """Process an event from User Graph API."""
     # results = []  # collects results of events
     # events = find_user_events(entry)
-    # results.extend()
+    # results.extend(...)
     return []
 
 
-def page_event(entry: dict) -> List[dict]:
+def page_event(entry: dict) -> List[List[Tuple[bool, dict]]]:
     """For each message in an entry, create and send a response."""
-    # Number of messages in batch before activating multithreading
-    SEQ_PROCESS_MSG_THRESH = 1
+    # Controller cannot be directly imported because of circular imports
+    controller: proc.Controller = proc.import_controller()
+    results: list = []
 
-    CONTROLLER = proc.import_controller()
-
+    # Handle message sequentially
     if len(entry.get('messaging', '')) <= SEQ_PROCESS_MSG_THRESH:
-        results = [handle_message(message, CONTROLLER)
-                   for message in get_messages(entry)]
-    else:  # Sequential handling of message
+        results: List[dict] = []
+        for message in get_messages(entry):
+            results.append(handle_message(message, controller))
+
+    # Handle message concurrently
+    else:
         results: list = []
-        from concurrent.futures import (Future, ThreadPoolExecutor)
         with ThreadPoolExecutor(max_workers=8) as p:
             # NOTE to future self: Turning this into a generator
             #   kills the concurrency since the list comprehension
@@ -67,7 +73,7 @@ def page_event(entry: dict) -> List[dict]:
             futures: List[Future] = []
             for message in get_messages(entry):
                 futures.append(
-                    p.submit(handle_message, *(message, CONTROLLER)))
+                    p.submit(handle_message, *(message, controller)))
 
         # Wait for all futures to finish
         for future in futures:
@@ -84,15 +90,17 @@ def page_event(entry: dict) -> List[dict]:
 
 
 def handle_message(message: recv.Message, controllerType: proc.Controller) \
-        -> dict:
+        -> List[Tuple[bool, dict]]:
     """Create and send Responses and return the output."""
 
     try:
-        return send.Response.from_message(
+        response: send.Response = send.Response.from_message(
             message=message,
-            withControllerType=controllerType).send()
+            withController=controllerType)
+        result = response.send()
+        return result
     except Exception as e:
-        generate_error_message(sys.exec_info(), e)
+        gen_err_msg(sys.exec_info(), e)
 
 
 def get_messages(entry: dict) -> recv.Message:
@@ -132,11 +140,10 @@ def get_messages(entry: dict) -> recv.Message:
             try:
                 messageInstance = messageType(entry=entry, mNum=msgNum)
             except recv.MessageParsingError as e:
-                generate_error_message(sys.exec_info(), e)
+                gen_err_msg(sys.exec_info(), e)
                 logging.warning(f"Failed to parse message. Error: {e}")
                 logging.debug(json.dumps(entry))
                 messageInstance = None
 
         if messageInstance:
-            print("\nReceived valid message!")
             yield messageInstance
