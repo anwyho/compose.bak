@@ -1,6 +1,6 @@
 from typing import (List)
 
-from .controller import (Controller, EchoController)  # noqa
+from .controller import (Controller)  # noqa
 
 
 def import_controller():
@@ -12,4 +12,4 @@ def import_controller():
     return CONTROLLER
 
 
-__all__: List[str] = ['Controller', 'import_controller']
+__all__: List[str] = ['Controller', 'import_controller', ]
