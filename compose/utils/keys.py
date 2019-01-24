@@ -6,10 +6,8 @@ import os
 from typing import (Tuple)
 
 # TODO: Refresh all keys
-# TODO: Provide default values with os.environ.get("KEY", "DEFAULT")
 
 MISSING_KEY_MSG = "Key not found."
-
 
 # Facebook
 FB_PAGE_ACCESS: str = os.environ.get(
@@ -19,12 +17,7 @@ FB_PAGE_ACCESS_2: str = os.environ.get(
 FB_VERIFY_TOK: str = os.environ.get(
     'FB_VERIFY_TOK', MISSING_KEY_MSG)
 
-
-# Wit
-WIT_TOK: str = os.environ.get('WIT_SERVER_TOK', MISSING_KEY_MSG)
-
 # Debug
-DEBUG_TOK: str = os.environ.get('DEBUG_TOK', MISSING_KEY_MSG)
 FLASK_ENV: str = os.environ.get('FLASK_ENV', "production")
 
 
