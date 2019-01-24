@@ -9,6 +9,7 @@ KEYS=(
     BART_PUBL
     FB_PAGE_ACCESS
     FB_PAGE_ACCESS_2
+    FB_PID
     FB_VERIFY_TOK
     WIT_SERVER_TOK
     .)
