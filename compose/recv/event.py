@@ -10,6 +10,7 @@ import compose.process as proc
 import compose.recv as recv
 import compose.send as send
 
+from compose.send.response import (Response)
 from compose.utils.errors import (gen_err_msg)
 
 # Number of messages in batch before activating multithreading
@@ -94,7 +95,7 @@ def handle_message(message: recv.Message, controllerType: proc.Controller) \
     """Create and send Responses and return the output."""
 
     try:
-        response: send.Response = send.Response.from_message(
+        response: Response = Response.from_message(
             message=message,
             withController=controllerType)
         result = response.send()

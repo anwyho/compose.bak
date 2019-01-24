@@ -1,5 +1,5 @@
 from compose.process.controller import (Controller)
-from compose.send.response_builder import (ResponseBuilder)
+from compose.send import (ResponseBuilder)
 
 
 class EchoController(Controller):

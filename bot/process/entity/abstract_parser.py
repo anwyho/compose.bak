@@ -23,8 +23,12 @@ class AbstractWitParser(ABC):
     def __init__(self, text: str, senderId: Optional[str] = None):
         self.text: str = text
         self.senderId: Optional[str] = senderId
-        self.entities = self.get_entities()
-        self.parse_entities()
+        try:
+            self.entities = self.get_entities()
+            self.parse_entities()
+        except Exception as e:
+            print(f"Failed to get or parse entities with exception {e}")
+            self.entities = None
 
     def get_entities(self):
         wit_header, wit_message_api = get_wit_header_and_url()

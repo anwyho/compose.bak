@@ -5,8 +5,8 @@ from abc import (ABC, abstractmethod)
 from concurrent.futures import (ThreadPoolExecutor)
 from typing import (Optional)
 
-from compose.send import (InvalidResponseStructureError,
-                          Response, ResponseBuilderError, ResponseBuilder)
+from compose.send import (ResponseBuilderError, ResponseBuilder)
+from compose.send.response import (InvalidResponseStructureError, Response)
 from compose.utils.errors import (gen_err_msg)
 
 
@@ -23,6 +23,7 @@ class Controller(ABC):
         """
 
         try:
+            response: Optional[Response] = None
             with ThreadPoolExecutor(max_workers=8) as executor:
                 self._executor = executor
 

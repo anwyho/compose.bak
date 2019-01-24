@@ -3,15 +3,13 @@ import json  # noqa
 import logging  # noqa
 import time  # noqa
 
-import compose.recv as recv
-import compose.send as send
-
 from typing import (Dict, List, Optional, Tuple, Union)  # noqa
 
+import compose.recv as recv
+# import compose.send as send
 from compose.process import (Controller)
-from compose.send import (Asset, Button, Response, ResponseAttachment,  # noqa
-                          ResponseBuilder, Template)  # noqa
-
+from compose.send import (button, response, response_attachment, ResponseBuilder)  # noqa
+from compose.utils.requests import get
 
 from bot.resources.map import (yield_map_id)
 from bot.phrasing import (Phrase)
@@ -114,13 +112,24 @@ class BartbotController(Controller):
     def process_text(self, respTail) -> ResponseBuilder:
         self.entities = self.await_entities()
 
-        # respTail.text = f'You typed: "{self.message.text}"'
-        # respTail.description = "Echoing message"
-        # respTail = respTail.next_chain(
-        #     text=str(self.entities),
-        #     description="Wit self.entities").next_chain()
+        respTail.text = f'You typed: "{self.message.text}"'
+        respTail.description = "Echoing message"
+        respTail = respTail.next_chain()
 
-        intent = self.entities.intent
+        if not hasattr(self.entities, 'entities'):
+            respTail = self.no_nlp_response(respTail)
+        else:
+            # Debugging text
+            respTail.text = str(self.entities)
+            respTail.description = "Wit self.entities"
+            respTail = respTail.next_chain()
+            try:
+                respTail = self.process_intent(self.entities.intent, respTail)
+            except Exception as e:
+                respTail = self.error_response(respTail, e)
+
+    def process_intent(self, intent: str, respTail: ResponseBuilder) \
+            -> ResponseBuilder:
         if 'help' == intent:
             respTail = self.help_response(respTail)
         elif 'map' == intent:
@@ -140,7 +149,6 @@ class BartbotController(Controller):
             respTail = self.unknown_response(respTail)
 
         # TODO: self.add_quick_replies
-
         respTail.add_quick_reply(
             text="What is love?", postbackPayload="Payload")
         respTail.add_quick_reply(
@@ -177,7 +185,8 @@ class BartbotController(Controller):
             mapId = next(mapIdGen)
         if mapId:
             respTail = respTail.next_chain(
-                attachment=send.Asset(assetType='image', attchId=mapId),
+                attachment=response_attachment.Asset(
+                    assetType='image', attchId=mapId),
                 description="Map asset from attachment ID")
         else:
             # TODO: Backup plan
@@ -199,8 +208,7 @@ class BartbotController(Controller):
 
         # HACK: Just trying to get basic functionality
 
-        from compose.utils.requests import get
-        from compose.utils.keys import BART_PUBL
+        from bot.utils.keys import BART_PUBL
 
         params: dict = {
             'cmd': 'depart' if self.entities.timeArr is None else 'arrive',
@@ -239,4 +247,15 @@ class BartbotController(Controller):
     def unknown_response(self, respTail: ResponseBuilder) -> ResponseBuilder:
         respTail.text = "[TODO: Fill in the unknown text response.]"
         respTail.description = "Unknown text"
+        return respTail
+
+    def no_nlp_response(self, respTail: ResponseBuilder) -> ResponseBuilder:
+        respTail.text = "Sorry, I seem to have lost my NLP... Try asking me that later!"  # noqa
+        respTail.description = "No NLP available."
+        return respTail
+
+    def error_response(self, respTail: ResponseBuilder, err) \
+            -> ResponseBuilder:
+        respTail.text = f"Oops! Something went wrong. Sorry about that...\n\nDebugging info: {err}"  # noqa: E501
+        respTail.description = f"ERROR: {err}"
         return respTail
