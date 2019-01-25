@@ -8,7 +8,6 @@ from typing import (List, Optional, Tuple)
 
 import compose.process as proc
 import compose.recv as recv
-import compose.send as send
 
 from compose.send.response import (Response)
 from compose.utils.errors import (gen_err_msg)
@@ -90,7 +89,8 @@ def page_event(entry: dict) -> List[List[Tuple[bool, dict]]]:
     return list(results)
 
 
-def handle_message(message: recv.Message, controllerType: proc.Controller) \
+def handle_message(message: recv.Message,
+                   controllerType: proc.AbstractController) \
         -> List[Tuple[bool, dict]]:
     """Create and send Responses and return the output."""
 

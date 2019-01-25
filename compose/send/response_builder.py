@@ -16,14 +16,10 @@ def require_rebuild(wrapped, instance, args, kwargs):
     """
     Setter wrapper that resets the built tag to `False`.
     """
-    if instance:
-        instance._built = False
-        instance._passingChecks = False
-        instance._modified = True
-    elif isinstance(args[0], Response):
-        args[0]._built = False
-        args[0]._passingChecks = False
-        args[0]._modified = True
+    inst = instance if instance else(
+        args[0] if isinstance(args[0], Response) else None)
+    if inst:
+        inst._built, inst._passingChecks, inst._modified = False, False, True
     return wrapped(*args, **kwargs)
 
 
