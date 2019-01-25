@@ -3,30 +3,32 @@ import json  # noqa
 import logging  # noqa
 import time  # noqa
 
+import compose.recv as recv
+
 from typing import (Dict, List, Optional, Tuple, Union)  # noqa
 
-import compose.recv as recv
-# import compose.send as send
-from compose.process import (Controller)
-from compose.send import (button, response, response_attachment, ResponseBuilder)  # noqa
+from compose.process import (AbstractController)
+from compose.send import (button as b, response_attachment as ra, ResponseBuilder)  # noqa
 from compose.utils.requests import get
 
 from bot.resources.map import (yield_map_id)
 from bot.phrasing import (Phrase)
 
 from .entity import (BartbotEntityParser)
+from .store import (Store)
 from .user import (BartbotUser)
 
 DRY_RUN = False
 
 
-class BartbotController(Controller):
+class BartbotController(AbstractController):
 
     def __init__(self, message, dryRun: bool = False) -> None:
 
         super().__init__(message=message, dryRun=dryRun)
         self.user: BartbotUser = BartbotUser(id=message.senderId)
         self.phrase: Phrase = Phrase(initialLocale=self.user.locale)
+        self.state: Store = Store()
         self._dryRun: bool = DRY_RUN
 
     # ## PRE- & POST- PROCESSING ## #
@@ -117,7 +119,7 @@ class BartbotController(Controller):
         respTail = respTail.next_chain()
 
         if not hasattr(self.entities, 'entities'):
-            respTail = self.no_nlp_response(respTail)
+            respTail = self.err_no_nlp_response(respTail)
         else:
             # Debugging text
             respTail.text = str(self.entities)
@@ -126,7 +128,7 @@ class BartbotController(Controller):
             try:
                 respTail = self.process_intent(self.entities.intent, respTail)
             except Exception as e:
-                respTail = self.error_response(respTail, e)
+                respTail = self.err_processing_fail_response(respTail, e)
 
     def process_intent(self, intent: str, respTail: ResponseBuilder) \
             -> ResponseBuilder:
@@ -185,8 +187,7 @@ class BartbotController(Controller):
             mapId = next(mapIdGen)
         if mapId:
             respTail = respTail.next_chain(
-                attachment=response_attachment.Asset(
-                    assetType='image', attchId=mapId),
+                attachment=ra.Asset(assetType='image', attchId=mapId),
                 description="Map asset from attachment ID")
         else:
             # TODO: Backup plan
@@ -249,12 +250,13 @@ class BartbotController(Controller):
         respTail.description = "Unknown text"
         return respTail
 
-    def no_nlp_response(self, respTail: ResponseBuilder) -> ResponseBuilder:
+    def err_no_nlp_response(self, respTail: ResponseBuilder) \
+            -> ResponseBuilder:
         respTail.text = "Sorry, I seem to have lost my NLP... Try asking me that later!"  # noqa
         respTail.description = "No NLP available."
         return respTail
 
-    def error_response(self, respTail: ResponseBuilder, err) \
+    def err_processing_fail_response(self, respTail: ResponseBuilder, err) \
             -> ResponseBuilder:
         respTail.text = f"Oops! Something went wrong. Sorry about that...\n\nDebugging info: {err}"  # noqa: E501
         respTail.description = f"ERROR: {err}"

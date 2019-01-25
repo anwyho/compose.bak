@@ -2,10 +2,10 @@ import json  # noqa
 import logging
 import time
 
-from datetime import datetime  # noqa
+from datetime import (datetime)  # noqa
 from typing import(Dict, Optional)  # noqa
 
-from .abstract_parser import (AbstractWitParser, WitParsingError)  # noqa
+from compose.process.abstract_parser import (AbstractWitParser, WitParsingError)  # noqa
 
 
 def get_datetime(witTime: str):

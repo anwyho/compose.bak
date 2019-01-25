@@ -1,6 +1,8 @@
 from typing import (List)
 
-from .controller import (Controller)  # noqa
+from .abstract_controller import (AbstractController)  # noqa
+from .abstract_parser import (AbstractWitParser, WitParsingError)
+from .abstract_user import (AbstractUser)
 
 
 def import_controller():
@@ -12,4 +14,5 @@ def import_controller():
     return CONTROLLER
 
 
-__all__: List[str] = ['Controller', 'import_controller', ]
+__all__: List[str] = ['AbstractController', 'AbstractWitParser',
+                      'AbstractUser', 'import_controller', 'WitParsingError', ]

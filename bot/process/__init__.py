@@ -1,6 +1,6 @@
 from typing import (List)
 
-from .controller import BartbotController
+from .controller import (BartbotController)
 
 CONTROLLER = BartbotController
 

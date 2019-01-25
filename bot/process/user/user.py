@@ -3,7 +3,7 @@ import logging  # noqa
 
 from typing import (List, Optional)  # noqa
 
-from .abstract_user import (AbstractUser)
+from compose.process.abstract_user import (AbstractUser)
 from compose.utils.requests import (get)  # noqa
 from compose.utils.urls import (MESSENGER_USER_API)  # noqa
 

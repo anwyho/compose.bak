@@ -10,7 +10,7 @@ from compose.send.response import (InvalidResponseStructureError, Response)
 from compose.utils.errors import (gen_err_msg)
 
 
-class Controller(ABC):
+class AbstractController(ABC):
     def __init__(self, message, dryRun: bool = False) -> None:
         self.message = message
         self._dryRun: bool = dryRun
@@ -60,7 +60,7 @@ class Controller(ABC):
         pass
 
 
-class EchoController(Controller):
+class EchoController(AbstractController):
     """
     Calling produce_responses from this class sends an echo of the
         received message.
