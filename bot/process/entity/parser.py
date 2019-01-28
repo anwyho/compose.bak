@@ -23,7 +23,7 @@ class BartbotEntityParser(AbstractWitParser):
     MIN_CONFIDENCE = 0.54
 
     def __repr__(self):
-        return f"""Intent: {self.intent}\nStation: {self.stn}\nStation Dest: {self.stnDest}\nTime: {self.time}\nTime Arr: {self.timeArr}\nDecision: {self.decision}\nGreetings? {self.greetings}\nThanks? {self.thanks}\nBye? {self.bye}"""  # noqa
+        return f"""{self.intent} - Intent\n{self.stn} - Station (Arr)\n{self.stnDest} - Station (Dest)\n{self.time} - Time (Dep)\n{self.timeArr} - Time (Arr)\n{self.decision} - Decision?\n{self.greetings} - Greeting?\n{self.thanks} - Thanks?\n{self.bye} - Salutation?"""  # noqa
 
     def parse_entities(self):
         # print(json.dumps(self.entities, indent=2))
