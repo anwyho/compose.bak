@@ -1,7 +1,9 @@
 
 import unittest
+
 from requests import (Response)
-from compose.test.test_utils import (app_endpoint, RequestBuilder)
+
+from compose.test import (app_endpoint, RequestBuilder)
 
 
 class TestPosts(unittest.TestCase):

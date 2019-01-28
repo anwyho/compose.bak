@@ -1,8 +1,8 @@
 import unittest
 
-import compose.process as proc
+from compose.test import (app_endpoint, RequestBuilder)  # noqa
 
-from compose.test.test_utils import (app_endpoint, RequestBuilder)  # noqa
+from . import (import_controller, AbstractController)
 
 
 class TestController(unittest.TestCase):
@@ -19,7 +19,7 @@ class TestController(unittest.TestCase):
         """
 
         # BUG: Find out why this doesn't work. Bartbot Controller should inherit from Controller.  # noqa: E501
-        self.assertTrue(issubclass(proc.import_controller(), proc.Controller),
+        self.assertTrue(issubclass(import_controller(), AbstractController),
                               "compose.process.import_controller should return a subclass of Controller.")  # noqa: E501
 
 

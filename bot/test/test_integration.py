@@ -4,7 +4,7 @@ from requests import (Response)  # noqa
 
 from bot.utils.keys import (FB_PID)
 
-from compose.test.test_utils import (app_endpoint, RequestBuilder)  # noqa
+from compose.test import (app_endpoint, RequestBuilder)  # noqa
 
 
 class TestIntegration(unittest.TestCase):

@@ -1,6 +1,10 @@
 import unittest
+
 from requests import (Response)  # noqa
-from compose.test.test_utils import (app_endpoint, RequestBuilder)  # noqa
+
+from compose.test import (app_endpoint, EntityBuilder, RequestBuilder)  # noqa
+
+from .parser import (BartbotEntityParser, get_datetime)  # noqa
 
 
 class TestWit(unittest.TestCase):
@@ -11,14 +15,8 @@ class TestWit(unittest.TestCase):
     def tearDown(self) -> None:
         pass
 
-    # def test_empty_post(self) -> None:
-    #     """
-    #     Sends empty and erroneous POST requests expecting 200 status.
-    #     """
-
-    #     response: Response = app_endpoint('POST', json={})
-    #     self.assertEqual(response.status_code, 200,
-    #                      'Empty post should still return 200 OK status.')
+    def test_datetime_conversion(self) -> None:
+        pass
 
     # def test_greeting(self) -> None:
     #     """
@@ -33,6 +31,61 @@ class TestWit(unittest.TestCase):
     #                      'POST should go through successfully.')
     #     self.assertNotIn('error', response,
     #                      'Error should not be in response.')
+
+
+travel_morning = {
+    "_text": "When's the next train from warm springs to union city tomorrow morning?",  # noqa
+    "entities": {
+        "orig": [
+            {
+                "confidence": 0.99944644516303,
+                "value": "WARM",
+                "type": "value"
+            }
+        ],
+        "dest": [
+            {
+                "confidence": 0.99151438846078,
+                "value": "UCTY",
+                "type": "value"
+            }
+        ],
+        "dep": [
+            {
+                "confidence": 0.91889398788601,
+                "values": [
+                    {
+                        "to": {
+                            "value": "2019-01-27T12:00:00.000-08:00",
+                            "grain": "hour"
+                        },
+                        "from": {
+                            "value": "2019-01-27T04:00:00.000-08:00",
+                            "grain": "hour"
+                        },
+                        "type": "interval"
+                    }
+                ],
+                "to": {
+                    "value": "2019-01-27T12:00:00.000-08:00",
+                    "grain": "hour"
+                },
+                "from": {
+                    "value": "2019-01-27T04:00:00.000-08:00",
+                    "grain": "hour"
+                },
+                "type": "interval"
+            }
+        ],
+        "intent": [
+            {
+                "confidence": 0.99999998373383,
+                "value": "travel"
+            }
+        ]
+    },
+    "msg_id": "1nVrB9egw7r3Vtnlc"
+}
 
 
 if __name__ == "__main__":
