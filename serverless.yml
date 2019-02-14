@@ -69,7 +69,7 @@ provider:
 
 functions:
   app:
-    handler: wsgi.handler
+    handler: wsgi_handler.handler
     description: A simple chatbot that echoes what it receives.  # Proxy for chatbot controller through Compose framework
     timeout: 8
     memorySize: 1024
