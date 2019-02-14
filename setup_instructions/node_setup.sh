@@ -2,14 +2,14 @@ echo "Installing node..."
 brew install node
 
 echo "Creating node modules..."
-npm init
+npm init -y
 
 echo "Installing serverless with plugins and testing server..."
 npm install -g serverless
 npm install --save-dev serverless-wsgi serverless-python-requirements serverless-plugin-parent
 
 echo "Setting default virtual environment folder to ~/VirEnvs..."
-export WORKON_HOME=~/VirEnvs
+if [ -z "$WORKON_HOME" ]; then export WORKON_HOME=~/VirEnvs
 export PROJECT_NAME=compose
 
 echo "Installed NPM and Serverless globally."

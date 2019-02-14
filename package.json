@@ -12,15 +12,15 @@
     "url": "git+https://github.com/anwyho/compose.git"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Anthony Ho",
+  "license": "GPL-3.0",
   "bugs": {
     "url": "https://github.com/anwyho/compose/issues"
   },
   "homepage": "https://github.com/anwyho/compose#readme",
   "devDependencies": {
     "serverless-plugin-parent": "0.0.3",
-    "serverless-python-requirements": "^4.2.5",
-    "serverless-wsgi": "^1.6.0"
+    "serverless-python-requirements": "^4.3.0",
+    "serverless-wsgi": "^1.7.1"
   }
 }
